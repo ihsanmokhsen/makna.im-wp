@@ -1,0 +1,240 @@
+# makna.im
+
+`makna.im` adalah website **Digital Memory Magazine**: ruang digital untuk merawat berita, cerita visual, dokumentasi, dan momen hidup yang punya makna.
+
+Website ini memakai WordPress sebagai CMS, sementara tampilan depannya dibuat sebagai frontend statis modern. Konten tidak dibuka dengan redirect ke WordPress, tetapi ditampilkan langsung di website melalui popup/modal.
+
+## Konsep
+
+Konsep utama aplikasi:
+
+- Brand: `makna.im`
+- Tema: `kenang-kenangan hidup`
+- Gaya visual: minimalis, premium, modern, editorial, cinematic
+- Inspirasi desain: Apple, Behance, Swiss editorial layout, high-end SaaS
+- Fungsi utama: menampilkan konten WordPress dalam bentuk landing page dan grid editorial
+
+## Fitur
+
+- Landing page premium dengan hero besar.
+- Search bar untuk mencari konten yang sudah dimuat.
+- Dua tab konten yang dipisahkan:
+  - `Berita`
+  - `Galeri`
+- Grid editorial/masonry dengan kartu visual.
+- Popup/modal detail konten di dalam website.
+- Tidak redirect ke WordPress saat kartu diklik.
+- Responsive untuk desktop dan mobile.
+- Data konten diambil dari WordPress public API.
+
+## Struktur File
+
+```text
+landingpageihsan/
+├── index.html
+├── ihsan-mokhsen.html
+├── README.md
+└── assets/
+    ├── css/
+    │   └── style.css
+    └── js/
+        ├── config.js
+        ├── wordpress.js
+        └── app.js
+```
+
+Penjelasan:
+
+- `index.html`: struktur halaman utama, navbar, hero, tab, grid, dan modal.
+- `ihsan-mokhsen.html`: redirect lama ke `index.html`.
+- `assets/css/style.css`: seluruh desain visual, layout, responsive, grid, dan modal.
+- `assets/js/config.js`: konfigurasi koneksi WordPress.
+- `assets/js/wordpress.js`: pengambilan data dari WordPress API.
+- `assets/js/app.js`: rendering konten ke halaman, filter tab, search, dan popup.
+
+## Hubungan Dengan WordPress
+
+Website ini mengambil konten dari:
+
+```text
+https://rexorange7.wordpress.com
+```
+
+Konfigurasinya ada di:
+
+```text
+assets/js/config.js
+```
+
+Isi konfigurasi saat ini:
+
+```js
+window.SITE_CONFIG = {
+  wordpress: {
+    baseUrl: "https://rexorange7.wordpress.com",
+    newsCategorySlug: "berita",
+    galleryCategorySlug: "galeri",
+    newsPerPage: 6,
+    galleryPerPage: 8,
+    gallerySource: "posts"
+  },
+  fallbackImage: "https://picsum.photos/seed/ntt-default/800/450"
+};
+```
+
+Arti setiap konfigurasi:
+
+- `baseUrl`: domain WordPress yang menjadi sumber konten.
+- `newsCategorySlug`: slug kategori untuk tab `Berita`.
+- `galleryCategorySlug`: slug kategori untuk tab `Galeri`.
+- `newsPerPage`: jumlah maksimal post berita yang diambil.
+- `galleryPerPage`: jumlah maksimal post galeri yang diambil.
+- `gallerySource`: sumber galeri. Saat ini memakai `posts`, artinya galeri diambil dari post kategori `galeri`.
+- `fallbackImage`: gambar cadangan jika post tidak punya featured image.
+
+## Endpoint API
+
+Karena situs memakai WordPress.com, website otomatis memakai endpoint:
+
+```text
+https://public-api.wordpress.com/wp/v2/sites/rexorange7.wordpress.com
+```
+
+Contoh endpoint yang dipakai:
+
+```text
+/categories?slug=berita
+/categories?slug=galeri
+/posts?categories={categoryId}
+```
+
+Jika suatu saat memakai WordPress self-hosted, script otomatis memakai format:
+
+```text
+https://domainanda.com/wp-json/wp/v2
+```
+
+## Alur Data
+
+Alur data aplikasi:
+
+1. `config.js` menyimpan alamat WordPress dan nama kategori.
+2. `wordpress.js` membaca konfigurasi tersebut.
+3. `wordpress.js` mencari ID kategori berdasarkan slug `berita` dan `galeri`.
+4. `wordpress.js` mengambil post dari kategori tersebut.
+5. `wordpress.js` merapikan data post menjadi format umum.
+6. `app.js` mengambil data dari `WordPressData.loadNews()` dan `WordPressData.loadGallery()`.
+7. `app.js` memberi label:
+   - post kategori `berita` menjadi `Berita`
+   - post kategori `galeri` menjadi `Galeri`
+8. `app.js` menampilkan konten ke grid editorial.
+9. Saat kartu diklik, `app.js` membuka konten di modal/popup.
+
+## Cara Menjalankan Lokal
+
+Jalankan dari folder project:
+
+```bash
+python3 -m http.server 4174 --bind 127.0.0.1
+```
+
+Lalu buka:
+
+```text
+http://127.0.0.1:4174/index.html
+```
+
+Catatan: jangan membuka langsung dengan `file://.../index.html`, karena akses API dan asset lebih stabil jika dijalankan melalui server lokal.
+
+## Cara Menambahkan Berita
+
+Di WordPress:
+
+1. Buka dashboard WordPress.
+2. Buat post baru.
+3. Pilih kategori `Berita`.
+4. Isi judul dan konten.
+5. Tambahkan `Featured Image` jika ingin kartu tampil lebih visual.
+6. Publish.
+7. Refresh website lokal.
+
+Post tersebut akan muncul di tab `Berita`.
+
+## Cara Menambahkan Galeri
+
+Di WordPress:
+
+1. Buat post baru.
+2. Pilih kategori `Galeri`.
+3. Isi judul atau cerita singkat.
+4. Tambahkan `Featured Image`.
+5. Publish.
+6. Refresh website lokal.
+
+Post tersebut akan muncul di tab `Galeri`.
+
+Untuk galeri, `Featured Image` wajib karena website hanya menampilkan post galeri yang punya gambar utama.
+
+## Tab Berita Dan Galeri
+
+Tab dipisahkan di frontend:
+
+- Tab `Berita` hanya menampilkan item kategori `berita`.
+- Tab `Galeri` hanya menampilkan item kategori `galeri`.
+
+Search hanya mencari konten pada data yang sudah dimuat dari WordPress.
+
+## Modal/Popup
+
+Saat kartu diklik:
+
+- Website tidak membuka halaman WordPress.
+- Website membuka modal di halaman yang sama.
+- Modal menampilkan:
+  - gambar
+  - kategori
+  - tanggal
+  - judul
+  - isi post WordPress
+
+Modal bisa ditutup dengan:
+
+- tombol `×`
+- klik area gelap di luar popup
+- tombol `Escape`
+
+## Catatan Teknis
+
+- Website ini masih frontend statis.
+- Tidak ada backend khusus.
+- Data diambil langsung dari WordPress public API melalui browser.
+- Untuk produksi, sebaiknya tambah sanitasi HTML untuk isi post.
+- Untuk SEO detail post, sebaiknya tambah halaman detail atau routing khusus.
+- Untuk konten banyak, sebaiknya tambah pagination atau load more.
+- Untuk performa gambar, sebaiknya gunakan optimasi image/CDN yang lebih baik.
+
+## File Penting
+
+Jika ingin mengganti domain WordPress:
+
+```text
+assets/js/config.js
+```
+
+Jika ingin mengubah cara data diambil:
+
+```text
+assets/js/wordpress.js
+```
+
+Jika ingin mengubah tampilan data, search, tab, atau modal:
+
+```text
+assets/js/app.js
+```
+
+Jika ingin mengubah desain:
+
+```text
+assets/css/style.css
+```

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>makna.im — Kenang-kenangan Hidup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <nav id="navbar" class="site-nav">
+    <a class="nav-logo" href="#">makna.im</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#content">Berita</a></li>
+      <li><a href="#content">Galeri</a></li>
+      <li><a href="#about">Tentang</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" type="button">Sign In</button>
+      <button class="btn btn-dark" type="button">Get Started</button>
+    </div>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Buka menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <main>
+    <section class="hero" id="explore">
+      <div class="hero-inner">
+        <p class="hero-kicker">Digital memory magazine</p>
+        <h1 class="hero-title">
+          <span>Kenang</span>
+          <span>Kenangan</span>
+          <span class="accent">Hidup</span>
+        </h1>
+        <p class="hero-subheadline">
+          Ruang digital untuk merawat berita, cerita visual, dokumentasi, dan momen hidup yang punya makna.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#content">Baca Berita</a>
+          <a class="btn btn-soft" href="#content">Lihat Galeri</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="discover" id="content" aria-label="Konten makna.im">
+      <div class="search-shell">
+        <label class="search-field" for="contentSearch">
+          <span>Cari</span>
+          <input id="contentSearch" type="search" placeholder="Cari berita atau galeri...">
+        </label>
+        <div class="category-tabs two-tabs" role="tablist" aria-label="Kategori konten">
+          <button class="tab active" type="button" data-filter="Berita">Berita</button>
+          <button class="tab" type="button" data-filter="Galeri">Galeri</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="showcase">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Arsip makna</p>
+          <h2>Berita dan galeri yang disimpan dengan tenang.</h2>
+        </div>
+        <p id="contentStatus">Memuat konten</p>
+      </div>
+      <div class="editorial-grid" id="contentGrid" aria-live="polite"></div>
+    </section>
+
+    <section class="about-strip" id="about">
+      <p>makna.im</p>
+      <h2>Kenang-kenangan hidup, shaped as a calm digital magazine.</h2>
+    </section>
+  </main>
+
+  <div class="content-modal" id="contentModal" aria-hidden="true">
+    <div class="modal-backdrop" data-modal-close></div>
+    <article class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" type="button" aria-label="Tutup popup" data-modal-close>×</button>
+      <div class="modal-image" id="modalImage"></div>
+      <div class="modal-body">
+        <p class="modal-date" id="modalDate"></p>
+        <h2 id="modalTitle"></h2>
+        <div class="modal-content" id="modalContent"></div>
+      </div>
+    </article>
+  </div>
+
+  <script src="assets/js/config.js?v=20260518-1"></script>
+  <script src="assets/js/wordpress.js?v=20260518-1"></script>
+  <script src="assets/js/app.js?v=20260518-1"></script>
+</body>
+</html>
