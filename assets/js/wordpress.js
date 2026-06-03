@@ -78,7 +78,13 @@
     }).format(date);
   }
 
-  // Mengubah slug kategori seperti "berita" atau "galeri" menjadi ID kategori WordPress.
+  // Timestamp dipakai oleh app.js untuk mengurutkan Archive gabungan dari yang terbaru.
+  function getTimestamp(value) {
+    const timestamp = Date.parse(value);
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  // Mengubah slug kategori seperti "archive" menjadi ID kategori WordPress.
   async function getCategoryId(slug) {
     if (!slug) return null;
     if (categoryCache.has(slug)) return categoryCache.get(slug);
@@ -107,8 +113,10 @@
     const media = getFeaturedMedia(post);
 
     return {
+      id: post.id,
       title: stripHtml(post.title?.rendered),
       date: formatDate(post.date),
+      timestamp: getTimestamp(post.date),
       image: media.src,
       alt: media.alt,
       hasImage: media.hasImage,
@@ -118,83 +126,41 @@
     };
   }
 
-  // Menyeragamkan format data media WordPress jika suatu saat gallerySource memakai "media".
-  function normalizeMedia(media) {
-    return {
-      title: media.alt_text || stripHtml(media.caption?.rendered) || stripHtml(media.title?.rendered) || "Galeri",
-      image: media.source_url || config.fallbackImage,
-      alt: media.alt_text || stripHtml(media.title?.rendered) || "Visual konten",
-      link: media.link || media.source_url || "#"
-    };
-  }
-
-  // Mengambil konten untuk tab Berita dari kategori yang ditentukan di config.js.
-  async function loadNews() {
+  // Mengambil semua post WordPress sebagai satu Archive.
+  // Jika archiveCategorySlug dikosongkan, semua post publik akan tampil.
+  // Jika archiveCategorySlug diisi "archive", hanya post kategori Archive yang tampil.
+  async function loadArchive() {
     if (!isEnabled()) return [];
 
     const params = {
       _embed: 1,
-      per_page: wpConfig.newsPerPage || 6,
+      per_page: wpConfig.archivePerPage || 12,
       orderby: "date",
       order: "desc"
     };
 
-    const hasCategoryFilter = Boolean(wpConfig.newsCategorySlug);
-    const categoryId = await getCategoryId(wpConfig.newsCategorySlug);
+    const hasCategoryFilter = Boolean(wpConfig.archiveCategorySlug);
+    const categoryId = await getCategoryId(wpConfig.archiveCategorySlug);
     if (hasCategoryFilter && !categoryId) return [];
     if (categoryId) params.categories = categoryId;
-
-    const galleryCategoryId = await getCategoryId(wpConfig.galleryCategorySlug);
-    if (galleryCategoryId) params.categories_exclude = galleryCategoryId;
 
     const posts = await fetchJson("posts", params);
     return posts.map(normalizePost);
   }
 
-  // Mengambil konten untuk tab Galeri dari post kategori galeri yang punya featured image.
-  async function loadGallery() {
-    if (!isEnabled()) return [];
-
-    if (wpConfig.gallerySource === "posts") {
-      const params = {
-        _embed: 1,
-        per_page: wpConfig.galleryPerPage || 8,
-        orderby: "date",
-        order: "desc"
-      };
-      const hasCategoryFilter = Boolean(wpConfig.galleryCategorySlug);
-      const categoryId = await getCategoryId(wpConfig.galleryCategorySlug);
-      if (hasCategoryFilter && !categoryId) return [];
-      if (categoryId) params.categories = categoryId;
-
-      const posts = await fetchJson("posts", params);
-      return posts.map(normalizePost).filter((item) => item.hasImage);
-    }
-
-    const media = await fetchJson("media", {
-      per_page: wpConfig.galleryPerPage || 8,
-      media_type: "image",
-      orderby: "date",
-      order: "desc"
-    });
-
-    return media.map(normalizeMedia);
-  }
-
-  // Link arsip WordPress. Saat ini tidak dipakai untuk redirect post, tapi tetap disiapkan.
-  function getNewsArchiveUrl() {
+  // Link Archive WordPress. Saat ini tidak dipakai untuk redirect post, tapi tetap disiapkan.
+  function getArchiveUrl() {
     const baseUrl = getBaseUrl();
     if (!baseUrl) return "#";
-    if (!wpConfig.newsCategorySlug) return baseUrl;
+    if (!wpConfig.archiveCategorySlug) return baseUrl;
 
-    return `${baseUrl}/category/${wpConfig.newsCategorySlug}/`;
+    return `${baseUrl}/category/${wpConfig.archiveCategorySlug}/`;
   }
 
   // Mengekspos fungsi WordPressData agar bisa dipanggil dari assets/js/app.js.
   window.WordPressData = {
     enabled: isEnabled,
-    loadNews,
-    loadGallery,
-    getNewsArchiveUrl
+    loadArchive,
+    getArchiveUrl
   };
 })();

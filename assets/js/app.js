@@ -1,6 +1,5 @@
 // State utama untuk konten yang sudah diambil dari WordPress.
 let allContentItems = [];
-let activeFilter = "Berita";
 let activeSearch = "";
 
 // Helper kecil untuk mengganti teks elemen berdasarkan id.
@@ -89,12 +88,12 @@ function initContentModal() {
   });
 }
 
-// Memberi label kategori internal untuk grid: post kategori berita menjadi Berita, post kategori galeri menjadi Galeri.
-function normalizeForGrid(items, category) {
+// Memberi label tunggal Archive untuk semua konten yang masuk ke grid.
+function normalizeForGrid(items) {
   return items.map((item) => ({
     ...item,
-    category,
-    searchText: `${item.title || ""} ${item.excerpt || ""} ${category}`.toLowerCase()
+    category: "Archive",
+    searchText: `${item.title || ""} ${item.excerpt || ""} Archive`.toLowerCase()
   }));
 }
 
@@ -134,7 +133,7 @@ function createContentCard(item) {
   return card;
 }
 
-// Menampilkan pesan kosong jika data tidak tersedia atau filter tidak cocok.
+// Menampilkan pesan kosong jika data tidak tersedia atau search tidak cocok.
 function renderEmpty(message) {
   const grid = document.getElementById("contentGrid");
   if (!grid) return;
@@ -158,20 +157,19 @@ function renderLoading() {
   grid.appendChild(loading);
 }
 
-// Menerapkan search dan filter dua tab: Berita atau Galeri.
+// Menerapkan search untuk satu Archive gabungan.
 function applyContentFilters() {
   const grid = document.getElementById("contentGrid");
   if (!grid) return;
 
   const query = activeSearch.trim().toLowerCase();
   const items = allContentItems.filter((item) => {
-    const matchesFilter = item.category === activeFilter;
     const matchesSearch = !query || item.searchText.includes(query);
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
 
   if (!items.length) {
-    renderEmpty("Belum ada konten yang cocok dengan filter ini.");
+    renderEmpty("Belum ada konten Archive yang cocok dengan pencarian ini.");
     return;
   }
 
@@ -179,10 +177,9 @@ function applyContentFilters() {
   items.forEach((item) => grid.appendChild(createContentCard(item)));
 }
 
-// Mengaktifkan search bar dan tab filter kategori.
+// Mengaktifkan search bar untuk Archive.
 function initFilters() {
   const search = document.getElementById("contentSearch");
-  const tabs = document.querySelectorAll(".tab");
 
   if (search) {
     search.addEventListener("input", (event) => {
@@ -190,19 +187,10 @@ function initFilters() {
       applyContentFilters();
     });
   }
-
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((item) => item.classList.remove("active"));
-      tab.classList.add("active");
-      activeFilter = tab.dataset.filter || "Berita";
-      applyContentFilters();
-    });
-  });
 }
 
 // Titik utama hubungan app.js dengan WordPress:
-// fungsi ini memanggil window.WordPressData.loadNews() dan loadGallery()
+// fungsi ini memanggil window.WordPressData.loadArchive()
 // yang didefinisikan di assets/js/wordpress.js.
 async function initWordPressContent() {
   const wp = window.WordPressData;
@@ -216,18 +204,13 @@ async function initWordPressContent() {
   }
 
   try {
-    const [news, gallery] = await Promise.all([
-      wp.loadNews(),
-      wp.loadGallery()
-    ]);
+    const archive = await wp.loadArchive();
 
-    // Gabungkan data berita dan galeri, tetapi tampilannya tetap dipisah lewat dua tab.
-    allContentItems = [
-      ...normalizeForGrid(news, "Berita"),
-      ...normalizeForGrid(gallery, "Galeri")
-    ];
+    // Semua post WordPress tampil sebagai satu Archive, lalu diurutkan dari terbaru.
+    allContentItems = normalizeForGrid(archive)
+      .sort((first, second) => (second.timestamp || 0) - (first.timestamp || 0));
 
-    setText("contentStatus", `${news.length} berita · ${gallery.length} galeri tersimpan`);
+    setText("contentStatus", `${allContentItems.length} item Archive`);
     applyContentFilters();
   } catch (error) {
     console.warn("Gagal memuat konten WordPress.", error);

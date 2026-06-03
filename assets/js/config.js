@@ -4,18 +4,11 @@ window.SITE_CONFIG = {
     // Domain publik WordPress yang menjadi sumber data konten.
     baseUrl: "https://rexorange7.wordpress.com",
 
-    // Kategori WordPress untuk tab Berita.
-    newsCategorySlug: "berita",
+    // Satu sumber utama: kategori Archive di WordPress.
+    archiveCategorySlug: "archive",
 
-    // Kategori WordPress untuk tab Galeri.
-    galleryCategorySlug: "galeri",
-
-    // Jumlah data maksimal yang diambil dari WordPress.
-    newsPerPage: 6,
-    galleryPerPage: 8,
-
-    // Untuk WordPress.com gratis, galeri paling aman diambil dari post kategori galeri.
-    gallerySource: "posts"
+    // Jumlah data maksimal yang diambil dari WordPress untuk Archive.
+    archivePerPage: 12
   },
 
   // Gambar cadangan jika post WordPress belum punya featured image.

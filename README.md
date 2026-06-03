@@ -1,6 +1,6 @@
 # makna.im
 
-`makna.im` adalah website **Digital Memory Magazine**: ruang digital untuk merawat berita, cerita visual, dokumentasi, dan momen hidup yang punya makna.
+`makna.im` adalah website **Digital Memory Magazine**: ruang digital untuk merawat cerita, visual, dokumentasi, dan momen hidup yang punya makna.
 
 Website ini memakai WordPress sebagai CMS, sementara tampilan depannya dibuat sebagai frontend statis modern. Konten tidak dibuka dengan redirect ke WordPress, tetapi ditampilkan langsung di website melalui popup/modal.
 
@@ -18,9 +18,9 @@ Konsep utama aplikasi:
 
 - Landing page premium dengan hero besar.
 - Search bar untuk mencari konten yang sudah dimuat.
-- Dua tab konten yang dipisahkan:
-  - `Berita`
-  - `Galeri`
+- Satu tab utama: `Archive`.
+- Semua post WordPress digabung dalam satu grid editorial.
+- Setiap kartu memakai label tunggal `Archive`.
 - Grid editorial/masonry dengan kartu visual.
 - Popup/modal detail konten di dalam website.
 - Tidak redirect ke WordPress saat kartu diklik.
@@ -45,12 +45,12 @@ landingpageihsan/
 
 Penjelasan:
 
-- `index.html`: struktur halaman utama, navbar, hero, tab, grid, dan modal.
+- `index.html`: struktur halaman utama, navbar, hero, Archive, grid, dan modal.
 - `ihsan-mokhsen.html`: redirect lama ke `index.html`.
 - `assets/css/style.css`: seluruh desain visual, layout, responsive, grid, dan modal.
 - `assets/js/config.js`: konfigurasi koneksi WordPress.
 - `assets/js/wordpress.js`: pengambilan data dari WordPress API.
-- `assets/js/app.js`: rendering konten ke halaman, filter tab, search, dan popup.
+- `assets/js/app.js`: rendering konten ke halaman, search Archive, dan popup.
 
 ## Hubungan Dengan WordPress
 
@@ -72,11 +72,8 @@ Isi konfigurasi saat ini:
 window.SITE_CONFIG = {
   wordpress: {
     baseUrl: "https://rexorange7.wordpress.com",
-    newsCategorySlug: "berita",
-    galleryCategorySlug: "galeri",
-    newsPerPage: 6,
-    galleryPerPage: 8,
-    gallerySource: "posts"
+    archiveCategorySlug: "archive",
+    archivePerPage: 12
   },
   fallbackImage: "https://picsum.photos/seed/ntt-default/800/450"
 };
@@ -85,11 +82,8 @@ window.SITE_CONFIG = {
 Arti setiap konfigurasi:
 
 - `baseUrl`: domain WordPress yang menjadi sumber konten.
-- `newsCategorySlug`: slug kategori untuk tab `Berita`.
-- `galleryCategorySlug`: slug kategori untuk tab `Galeri`.
-- `newsPerPage`: jumlah maksimal post berita yang diambil.
-- `galleryPerPage`: jumlah maksimal post galeri yang diambil.
-- `gallerySource`: sumber galeri. Saat ini memakai `posts`, artinya galeri diambil dari post kategori `galeri`.
+- `archiveCategorySlug`: slug kategori WordPress untuk Archive.
+- `archivePerPage`: jumlah maksimal post Archive yang diambil.
 - `fallbackImage`: gambar cadangan jika post tidak punya featured image.
 
 ## Endpoint API
@@ -103,9 +97,9 @@ https://public-api.wordpress.com/wp/v2/sites/rexorange7.wordpress.com
 Contoh endpoint yang dipakai:
 
 ```text
-/categories?slug=berita
-/categories?slug=galeri
-/posts?categories={categoryId}
+/posts
+/categories?slug=archive
+/posts?categories={archiveCategoryId}
 ```
 
 Jika suatu saat memakai WordPress self-hosted, script otomatis memakai format:
@@ -120,15 +114,15 @@ Alur data aplikasi:
 
 1. `config.js` menyimpan alamat WordPress dan nama kategori.
 2. `wordpress.js` membaca konfigurasi tersebut.
-3. `wordpress.js` mencari ID kategori berdasarkan slug `berita` dan `galeri`.
-4. `wordpress.js` mengambil post dari kategori tersebut.
+3. `wordpress.js` mencari ID kategori berdasarkan slug `archive`.
+4. `wordpress.js` mengambil post dari kategori Archive.
 5. `wordpress.js` merapikan data post menjadi format umum.
-6. `app.js` mengambil data dari `WordPressData.loadNews()` dan `WordPressData.loadGallery()`.
-7. `app.js` memberi label:
-   - post kategori `berita` menjadi `Berita`
-   - post kategori `galeri` menjadi `Galeri`
-8. `app.js` menampilkan konten ke grid editorial.
-9. Saat kartu diklik, `app.js` membuka konten di modal/popup.
+6. `app.js` mengambil data dari `WordPressData.loadArchive()`.
+7. `app.js` menampilkan semua konten sebagai satu Archive.
+8. `app.js` mengurutkan Archive dari konten terbaru.
+9. `app.js` memberi label `Archive` pada setiap kartu.
+10. `app.js` menampilkan konten ke grid editorial.
+11. Saat kartu diklik, `app.js` membuka konten di modal/popup.
 
 ## Cara Menjalankan Lokal
 
@@ -146,41 +140,28 @@ http://127.0.0.1:4174/index.html
 
 Catatan: jangan membuka langsung dengan `file://.../index.html`, karena akses API dan asset lebih stabil jika dijalankan melalui server lokal.
 
-## Cara Menambahkan Berita
+## Cara Menambahkan Konten Archive
 
 Di WordPress:
 
 1. Buka dashboard WordPress.
 2. Buat post baru.
-3. Pilih kategori `Berita`.
+3. Pilih kategori `Archive` jika kategori tersebut sudah dibuat.
 4. Isi judul dan konten.
 5. Tambahkan `Featured Image` jika ingin kartu tampil lebih visual.
 6. Publish.
 7. Refresh website lokal.
 
-Post tersebut akan muncul di tab `Berita`.
+Post tersebut akan muncul di `Archive`.
 
-## Cara Menambahkan Galeri
+## Archive
 
-Di WordPress:
+Frontend hanya memakai satu tab:
 
-1. Buat post baru.
-2. Pilih kategori `Galeri`.
-3. Isi judul atau cerita singkat.
-4. Tambahkan `Featured Image`.
-5. Publish.
-6. Refresh website lokal.
-
-Post tersebut akan muncul di tab `Galeri`.
-
-Untuk galeri, `Featured Image` wajib karena website hanya menampilkan post galeri yang punya gambar utama.
-
-## Tab Berita Dan Galeri
-
-Tab dipisahkan di frontend:
-
-- Tab `Berita` hanya menampilkan item kategori `berita`.
-- Tab `Galeri` hanya menampilkan item kategori `galeri`.
+- `Archive` menampilkan semua post WordPress sebagai satu koleksi.
+- Jika ingin lebih rapi di dashboard WordPress, gunakan satu kategori bernama `Archive`.
+- Label yang tampil di kartu adalah `Archive`.
+- Konten diurutkan dari yang terbaru berdasarkan tanggal post WordPress.
 
 Search hanya mencari konten pada data yang sudah dimuat dari WordPress.
 
@@ -227,7 +208,7 @@ Jika ingin mengubah cara data diambil:
 assets/js/wordpress.js
 ```
 
-Jika ingin mengubah tampilan data, search, tab, atau modal:
+Jika ingin mengubah tampilan data, search, Archive, atau modal:
 
 ```text
 assets/js/app.js
