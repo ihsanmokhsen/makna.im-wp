@@ -6,18 +6,14 @@ let activeSearch = "";
 function applyTheme(theme) {
   const selectedTheme = theme === "dark" ? "dark" : "light";
   const toggle = document.getElementById("themeToggle");
-  const toggleText = document.getElementById("themeToggleText");
+  const isDark = selectedTheme === "dark";
 
   document.documentElement.dataset.theme = selectedTheme;
 
   if (toggle) {
-    const isDark = selectedTheme === "dark";
-    toggle.setAttribute("aria-pressed", String(isDark));
+    toggle.checked = isDark;
+    toggle.setAttribute("aria-checked", String(isDark));
     toggle.setAttribute("aria-label", isDark ? "Aktifkan light mode" : "Aktifkan dark mode");
-  }
-
-  if (toggleText) {
-    toggleText.textContent = selectedTheme === "dark" ? "Light" : "Dark";
   }
 }
 
@@ -36,8 +32,8 @@ function initThemeToggle() {
 
   if (!toggle) return;
 
-  toggle.addEventListener("click", () => {
-    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  toggle.addEventListener("change", () => {
+    const nextTheme = toggle.checked ? "dark" : "light";
     applyTheme(nextTheme);
 
     try {

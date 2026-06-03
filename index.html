@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=20260603-photo-fit">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260603-liquid-nobg">
 </head>
 <body>
   <nav id="navbar" class="site-nav">
@@ -30,10 +30,9 @@
     <div class="nav-actions">
       <a class="btn btn-dark" href="https://rexorange7.wordpress.com/wp-admin/post-new.php" target="_blank" rel="noopener noreferrer">Tambah Konten</a>
     </div>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan dark mode" aria-pressed="false">
-      <span class="theme-toggle-icon" aria-hidden="true"></span>
-      <span id="themeToggleText">Dark</span>
-    </button>
+    <label class="theme-switch" aria-label="Ganti dark dan light mode">
+      <input class="liquid-3" id="themeToggle" type="checkbox" role="switch" aria-label="Aktifkan dark mode" aria-checked="false">
+    </label>
     <button class="hamburger" id="hamburger" type="button" aria-label="Buka menu">
       <span></span>
       <span></span>
@@ -115,6 +114,6 @@
 
   <script src="assets/js/config.js?v=20260603-archive2"></script>
   <script src="assets/js/wordpress.js?v=20260603-engagement"></script>
-  <script src="assets/js/app.js?v=20260603-engagement"></script>
+  <script src="assets/js/app.js?v=20260603-liquid-switch"></script>
 </body>
 </html>
