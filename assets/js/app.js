@@ -2,6 +2,52 @@
 let allContentItems = [];
 let activeSearch = "";
 
+// Mengaktifkan dark/light mode dan menyimpan pilihan di browser.
+function applyTheme(theme) {
+  const selectedTheme = theme === "dark" ? "dark" : "light";
+  const toggle = document.getElementById("themeToggle");
+  const toggleText = document.getElementById("themeToggleText");
+
+  document.documentElement.dataset.theme = selectedTheme;
+
+  if (toggle) {
+    const isDark = selectedTheme === "dark";
+    toggle.setAttribute("aria-pressed", String(isDark));
+    toggle.setAttribute("aria-label", isDark ? "Aktifkan light mode" : "Aktifkan dark mode");
+  }
+
+  if (toggleText) {
+    toggleText.textContent = selectedTheme === "dark" ? "Light" : "Dark";
+  }
+}
+
+function initThemeToggle() {
+  const toggle = document.getElementById("themeToggle");
+  const storedTheme = (() => {
+    try {
+      return localStorage.getItem("makna-theme");
+    } catch (error) {
+      return null;
+    }
+  })();
+  const currentTheme = storedTheme || document.documentElement.dataset.theme || "light";
+
+  applyTheme(currentTheme);
+
+  if (!toggle) return;
+
+  toggle.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+
+    try {
+      localStorage.setItem("makna-theme", nextTheme);
+    } catch (error) {
+      // Jika browser memblokir localStorage, toggle tetap bekerja untuk sesi ini.
+    }
+  });
+}
+
 // Helper kecil untuk mengganti teks elemen berdasarkan id.
 function setText(id, text) {
   const element = document.getElementById(id);
@@ -221,6 +267,7 @@ async function initWordPressContent() {
 
 // Jalankan semua fitur setelah HTML selesai dimuat.
 document.addEventListener("DOMContentLoaded", () => {
+  initThemeToggle();
   initNavbar();
   initContentModal();
   initFilters();

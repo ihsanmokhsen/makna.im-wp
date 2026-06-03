@@ -5,10 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kenang Kenangan Hidup</title>
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg?v=20260603-title">
+  <script>
+    try {
+      const storedTheme = localStorage.getItem("makna-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme = storedTheme || (prefersDark ? "dark" : "light");
+    } catch (error) {
+      document.documentElement.dataset.theme = "light";
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260603-dark">
 </head>
 <body>
   <nav id="navbar" class="site-nav">
@@ -19,9 +28,12 @@
       <li><a href="#about">Tentang</a></li>
     </ul>
     <div class="nav-actions">
-      <a class="btn btn-ghost" href="https://wordpress.com/home/rexorange7.wordpress.com" target="_blank" rel="noopener noreferrer">Login WP</a>
       <a class="btn btn-dark" href="https://rexorange7.wordpress.com/wp-admin/post-new.php" target="_blank" rel="noopener noreferrer">Tambah Konten</a>
     </div>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan dark mode" aria-pressed="false">
+      <span class="theme-toggle-icon" aria-hidden="true"></span>
+      <span id="themeToggleText">Dark</span>
+    </button>
     <button class="hamburger" id="hamburger" type="button" aria-label="Buka menu">
       <span></span>
       <span></span>
@@ -89,6 +101,6 @@
 
   <script src="assets/js/config.js?v=20260603-archive2"></script>
   <script src="assets/js/wordpress.js?v=20260603-archive2"></script>
-  <script src="assets/js/app.js?v=20260603-archive2"></script>
+  <script src="assets/js/app.js?v=20260603-dark"></script>
 </body>
 </html>

@@ -6,8 +6,58 @@
   --accent: #2563ff;
   --line: rgba(5, 5, 5, 0.08);
   --line-strong: rgba(5, 5, 5, 0.14);
+  --body-glow: rgba(37, 99, 255, 0.11);
+  --nav-bg: rgba(245, 245, 247, 0.72);
+  --nav-border: rgba(255, 255, 255, 0.56);
+  --nav-link: rgba(5, 5, 5, 0.66);
+  --control-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.86);
+  --field-bg: rgba(245, 245, 247, 0.82);
+  --placeholder: rgba(5, 5, 5, 0.42);
+  --pill-muted: rgba(5, 5, 5, 0.56);
+  --inverse: #050505;
+  --inverse-text: #ffffff;
+  --empty-bg: rgba(255, 255, 255, 0.7);
+  --modal-bg: rgba(255, 255, 255, 0.94);
+  --modal-border: rgba(255, 255, 255, 0.7);
+  --modal-text: rgba(5, 5, 5, 0.7);
+  --about-bg: #050505;
+  --about-text: #ffffff;
+  --about-muted: rgba(255, 255, 255, 0.58);
   --shadow: 0 28px 80px rgba(10, 15, 30, 0.12);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #08090b;
+  --ink: #f5f5f7;
+  --muted: #a2a6ad;
+  --soft: #111316;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --body-glow: rgba(37, 99, 255, 0.2);
+  --nav-bg: rgba(8, 9, 11, 0.76);
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-link: rgba(245, 245, 247, 0.68);
+  --control-bg: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(17, 19, 22, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --field-bg: rgba(255, 255, 255, 0.07);
+  --placeholder: rgba(245, 245, 247, 0.42);
+  --pill-muted: rgba(245, 245, 247, 0.6);
+  --inverse: #f5f5f7;
+  --inverse-text: #050505;
+  --empty-bg: rgba(255, 255, 255, 0.06);
+  --modal-bg: rgba(17, 19, 22, 0.96);
+  --modal-border: rgba(255, 255, 255, 0.1);
+  --modal-text: rgba(245, 245, 247, 0.74);
+  --about-bg: #f5f5f7;
+  --about-text: #050505;
+  --about-muted: rgba(5, 5, 5, 0.58);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -24,7 +74,7 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 50% 0%, rgba(37, 99, 255, 0.11), transparent 30rem),
+    radial-gradient(circle at 50% 0%, var(--body-glow), transparent 30rem),
     var(--bg);
   color: var(--ink);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -54,12 +104,12 @@ button {
   top: 0;
   z-index: 40;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 2rem;
   padding: 1rem clamp(1.25rem, 4vw, 4.5rem);
-  background: rgba(245, 245, 247, 0.72);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.56);
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
   backdrop-filter: blur(22px);
 }
 
@@ -79,7 +129,7 @@ button {
 }
 
 .nav-links a {
-  color: rgba(5, 5, 5, 0.66);
+  color: var(--nav-link);
   font-size: 0.82rem;
   font-weight: 500;
   text-decoration: none;
@@ -120,8 +170,8 @@ button {
 }
 
 .btn-dark {
-  background: var(--ink);
-  color: #fff;
+  background: var(--inverse);
+  color: var(--inverse-text);
   box-shadow: 0 14px 28px rgba(5, 5, 5, 0.12);
 }
 
@@ -140,16 +190,49 @@ button {
 .btn-soft {
   min-height: 52px;
   padding: 0 1.45rem;
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(5, 5, 5, 0.08);
+  background: var(--control-bg);
+  border-color: var(--line);
   color: var(--ink);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 42px;
+  padding: 0 0.95rem 0 0.75rem;
+  background: var(--control-bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 750;
+  transition: transform 0.25s var(--ease), background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+
+.theme-toggle-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background: var(--ink);
+  border-radius: 999px;
+  box-shadow: inset -6px -4px 0 var(--bg);
+}
+
+:root[data-theme="dark"] .theme-toggle-icon {
+  box-shadow: 0 0 0 4px rgba(37, 99, 255, 0.14);
 }
 
 .hamburger {
   display: none;
   width: 42px;
   height: 42px;
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--control-bg);
   border: 1px solid var(--line);
   border-radius: 999px;
   place-items: center;
@@ -187,10 +270,10 @@ button {
 .hero-title {
   display: grid;
   gap: 0.05em;
-  font-size: clamp(4.1rem, 13.6vw, 13.4rem);
+  font-size: clamp(3.4rem, 10.8vw, 10.6rem);
   font-weight: 900;
   letter-spacing: -0.075em;
-  line-height: 0.8;
+  line-height: 0.84;
 }
 
 .hero-title span {
@@ -230,8 +313,8 @@ button {
   width: min(1120px, 100%);
   margin: 0 auto;
   padding: 0.72rem;
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.86);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 999px;
   box-shadow: 0 24px 70px rgba(10, 15, 30, 0.12);
   backdrop-filter: blur(24px);
@@ -243,7 +326,7 @@ button {
   gap: 0.85rem;
   min-height: 52px;
   padding: 0 1rem;
-  background: rgba(245, 245, 247, 0.82);
+  background: var(--field-bg);
   border: 1px solid var(--line);
   border-radius: 999px;
 }
@@ -264,7 +347,7 @@ button {
 }
 
 .search-field input::placeholder {
-  color: rgba(5, 5, 5, 0.42);
+  color: var(--placeholder);
 }
 
 .category-tabs {
@@ -285,7 +368,7 @@ button {
   background: transparent;
   border: 0;
   border-radius: 999px;
-  color: rgba(5, 5, 5, 0.56);
+  color: var(--pill-muted);
   font-size: 0.82rem;
   font-weight: 700;
   transition: color 0.25s var(--ease), background 0.25s var(--ease), box-shadow 0.25s var(--ease);
@@ -293,8 +376,8 @@ button {
 
 .tab:hover,
 .tab.active {
-  background: var(--ink);
-  color: #fff;
+  background: var(--inverse);
+  color: var(--inverse-text);
   box-shadow: 0 12px 26px rgba(5, 5, 5, 0.12);
 }
 
@@ -464,7 +547,7 @@ button {
 .content-loading {
   grid-column: 1 / -1;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--empty-bg);
   border: 1px dashed var(--line-strong);
   border-radius: 24px;
   color: var(--muted);
@@ -477,12 +560,12 @@ button {
   display: grid;
   gap: 1rem;
   padding: clamp(4rem, 9vw, 8rem) clamp(1.25rem, 4vw, 4.5rem);
-  background: #050505;
-  color: #fff;
+  background: var(--about-bg);
+  color: var(--about-text);
 }
 
 .about-strip p {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--about-muted);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -525,8 +608,8 @@ button {
   width: min(1040px, 100%);
   max-height: min(84vh, 820px);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
   border-radius: 28px;
   box-shadow: 0 34px 120px rgba(0, 0, 0, 0.34);
 }
@@ -538,7 +621,7 @@ button {
   z-index: 2;
   width: 44px;
   height: 44px;
-  background: rgba(255, 255, 255, 0.84);
+  background: var(--control-bg);
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--ink);
@@ -580,7 +663,7 @@ button {
 }
 
 .modal-content {
-  color: rgba(5, 5, 5, 0.7);
+  color: var(--modal-text);
   font-size: 1rem;
   line-height: 1.75;
 }
@@ -596,7 +679,8 @@ button {
 
 @media (max-width: 980px) {
   .site-nav {
-    grid-template-columns: auto auto;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
   }
 
   .nav-links,
@@ -609,6 +693,10 @@ button {
     justify-self: end;
   }
 
+  .theme-toggle {
+    justify-self: end;
+  }
+
   .nav-links.open {
     position: fixed;
     top: 68px;
@@ -618,7 +706,7 @@ button {
     justify-content: stretch;
     gap: 0;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.92);
+    background: var(--modal-bg);
     border: 1px solid var(--line);
     border-radius: 24px;
     box-shadow: var(--shadow);
@@ -681,8 +769,8 @@ button {
   }
 
   .hero-title {
-    font-size: clamp(4.3rem, 21vw, 7rem);
-    letter-spacing: -0.08em;
+    font-size: clamp(3.35rem, 16.5vw, 5.7rem);
+    letter-spacing: -0.07em;
   }
 
   .hero-actions {
