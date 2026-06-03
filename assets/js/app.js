@@ -1,19 +1,27 @@
 // State utama untuk konten yang sudah diambil dari WordPress.
 let allContentItems = [];
 let activeSearch = "";
+let lastScrollY = 0;
 
-// Mengaktifkan dark/light mode dan menyimpan pilihan di browser.
+// ═══════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════
+
 function applyTheme(theme) {
   const selectedTheme = theme === "dark" ? "dark" : "light";
   const toggle = document.getElementById("themeToggle");
+  const toggleText = document.getElementById("themeToggleText");
   const isDark = selectedTheme === "dark";
 
   document.documentElement.dataset.theme = selectedTheme;
 
   if (toggle) {
-    toggle.checked = isDark;
-    toggle.setAttribute("aria-checked", String(isDark));
+    toggle.setAttribute("aria-pressed", String(isDark));
     toggle.setAttribute("aria-label", isDark ? "Aktifkan light mode" : "Aktifkan dark mode");
+  }
+
+  if (toggleText) {
+    toggleText.textContent = isDark ? "Light" : "Dark";
   }
 }
 
@@ -32,8 +40,8 @@ function initThemeToggle() {
 
   if (!toggle) return;
 
-  toggle.addEventListener("change", () => {
-    const nextTheme = toggle.checked ? "dark" : "light";
+  toggle.addEventListener("click", () => {
+    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     applyTheme(nextTheme);
 
     try {
@@ -44,13 +52,19 @@ function initThemeToggle() {
   });
 }
 
-// Helper kecil untuk mengganti teks elemen berdasarkan id.
+// ═══════════════════════════════════════════
+// HELPER
+// ═══════════════════════════════════════════
+
 function setText(id, text) {
   const element = document.getElementById(id);
   if (element) element.textContent = text;
 }
 
-// Mengatur menu mobile: tombol hamburger membuka/menutup link navbar.
+// ═══════════════════════════════════════════
+// NAVBAR — mobile menu + hide on scroll
+// ═══════════════════════════════════════════
+
 function initNavbar() {
   const navLinks = document.getElementById("navLinks");
   const hamburger = document.getElementById("hamburger");
@@ -59,20 +73,60 @@ function initNavbar() {
 
   hamburger.addEventListener("click", () => {
     navLinks.classList.toggle("open");
+    hamburger.classList.toggle("active");
   });
 
   navLinks.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => navLinks.classList.remove("open"));
+    link.addEventListener("click", () => {
+      navLinks.classList.remove("open");
+      hamburger.classList.remove("active");
+    });
   });
+
+  // Hide navbar on scroll down, show on scroll up
+  const navbar = document.getElementById("navbar");
+  if (!navbar) return;
+
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > 80 && currentScrollY > lastScrollY) {
+          navbar.classList.add("nav-hidden");
+        } else {
+          navbar.classList.remove("nav-hidden");
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 }
 
-// Membuat elemen gambar dengan fallback jika URL gambar gagal dimuat.
+// ═══════════════════════════════════════════
+// IMAGES
+// ═══════════════════════════════════════════
+
 function createImage(src, alt) {
   const image = document.createElement("img");
   image.src = src || window.SITE_CONFIG?.fallbackImage;
   image.alt = alt || "";
   image.loading = "lazy";
   image.decoding = "async";
+
+  // Fade in when loaded
+  image.addEventListener("load", () => {
+    image.classList.add("img-loaded");
+  });
+  // If already cached
+  if (image.complete) {
+    image.classList.add("img-loaded");
+  }
+
   image.addEventListener("error", () => {
     const fallback = window.SITE_CONFIG?.fallbackImage;
     if (fallback && image.src !== fallback) {
@@ -82,13 +136,15 @@ function createImage(src, alt) {
   return image;
 }
 
-// Membatasi panjang excerpt agar caption kartu tetap rapi.
 function limitText(text, maxLength = 155) {
   if (!text) return "";
   return text.length > maxLength ? `${text.slice(0, maxLength).trim()}...` : text;
 }
 
-// Membuka popup detail konten tanpa redirect ke WordPress.
+// ═══════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════
+
 function openContentModal(item) {
   const modal = document.getElementById("contentModal");
   const modalImage = document.getElementById("modalImage");
@@ -107,11 +163,8 @@ function openContentModal(item) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
-  initEngagementHandlers(item);
-  loadEngagement(item);
 }
 
-// Menutup popup detail konten.
 function closeContentModal() {
   const modal = document.getElementById("contentModal");
   if (!modal) return;
@@ -121,107 +174,6 @@ function closeContentModal() {
   document.body.classList.remove("modal-open");
 }
 
-function renderComments(comments) {
-  const commentsList = document.getElementById("commentsList");
-  if (!commentsList) return;
-
-  const visibleComments = comments.filter((comment) => !comment.isLike);
-  commentsList.textContent = "";
-
-  if (!visibleComments.length) {
-    const empty = document.createElement("p");
-    empty.className = "content-empty";
-    empty.textContent = "Belum ada komentar.";
-    commentsList.appendChild(empty);
-    return;
-  }
-
-  visibleComments.forEach((comment) => {
-    const item = document.createElement("article");
-    item.className = "comment-item";
-
-    const header = document.createElement("header");
-    const author = document.createElement("strong");
-    author.textContent = comment.author;
-    const date = document.createElement("span");
-    date.textContent = comment.date || "Archive";
-    header.append(author, date);
-
-    const body = document.createElement("div");
-    body.innerHTML = comment.content || `<p>${comment.text}</p>`;
-
-    item.append(header, body);
-    commentsList.appendChild(item);
-  });
-}
-
-async function loadEngagement(item) {
-  const wp = window.WordPressData;
-  const commentsList = document.getElementById("commentsList");
-  const commentStatus = document.getElementById("commentStatus");
-
-  setText("commentStatus", "");
-
-  if (commentsList) {
-    commentsList.textContent = "";
-    const loading = document.createElement("p");
-    loading.textContent = "Memuat komentar...";
-    commentsList.appendChild(loading);
-  }
-
-  if (!wp?.loadComments || !item.id) {
-    if (commentsList) commentsList.textContent = "Komentar belum tersedia untuk post ini.";
-    return;
-  }
-
-  try {
-    const comments = await wp.loadComments(item.id);
-    renderComments(comments);
-  } catch (error) {
-    console.warn("Gagal memuat komentar WordPress.", error);
-    if (commentsList) commentsList.textContent = "Komentar belum bisa dimuat.";
-    if (commentStatus) commentStatus.textContent = "Komentar WordPress belum bisa dimuat.";
-  }
-}
-
-function initEngagementHandlers(item) {
-  const wp = window.WordPressData;
-  const commentForm = document.getElementById("commentForm");
-
-  if (commentForm) {
-    commentForm.onsubmit = async (event) => {
-      event.preventDefault();
-
-      if (!wp?.submitComment || !item.id) return;
-
-      const submitButton = commentForm.querySelector("button[type='submit']");
-      const name = document.getElementById("commentName")?.value.trim();
-      const content = document.getElementById("commentText")?.value.trim();
-
-      if (!name || !content) {
-        setText("commentStatus", "Lengkapi nama dan komentar.");
-        return;
-      }
-
-      if (submitButton) submitButton.disabled = true;
-      setText("commentStatus", "Menyimpan komentar...");
-
-      try {
-        await wp.submitComment(item.id, { name, content });
-        document.getElementById("commentText").value = "";
-        setText("commentStatus", "Komentar tersimpan di WordPress.");
-        await loadEngagement(item);
-      } catch (error) {
-        console.warn("Gagal menyimpan komentar WordPress.", error);
-        setText("commentStatus", "Komentar belum bisa disimpan.");
-      } finally {
-        if (submitButton) submitButton.disabled = false;
-      }
-    };
-  }
-}
-
-// Menghubungkan tombol close/backdrop/Escape dengan fungsi tutup modal.
 function initContentModal() {
   document.querySelectorAll("[data-modal-close]").forEach((element) => {
     element.addEventListener("click", closeContentModal);
@@ -232,7 +184,10 @@ function initContentModal() {
   });
 }
 
-// Memberi label tunggal Archive untuk semua konten yang masuk ke grid.
+// ═══════════════════════════════════════════
+// GRID & CARDS
+// ═══════════════════════════════════════════
+
 function normalizeForGrid(items) {
   return items.map((item) => ({
     ...item,
@@ -241,11 +196,11 @@ function normalizeForGrid(items) {
   }));
 }
 
-// Membuat satu kartu editorial pada masonry grid.
-function createContentCard(item) {
+function createContentCard(item, index) {
   const card = document.createElement("button");
-  card.className = "content-card";
+  card.className = "content-card fade-in";
   card.type = "button";
+  card.style.transitionDelay = `${Math.min(index * 0.08, 0.6)}s`;
   card.setAttribute("aria-label", `Buka ${item.title || item.category}`);
   card.addEventListener("click", () => openContentModal(item));
 
@@ -277,31 +232,82 @@ function createContentCard(item) {
   return card;
 }
 
-// Menampilkan pesan kosong jika data tidak tersedia atau search tidak cocok.
+// ═══════════════════════════════════════════
+// SKELETON LOADER
+// ═══════════════════════════════════════════
+
+function renderSkeletons() {
+  const grid = document.getElementById("contentGrid");
+  if (!grid) return;
+
+  grid.textContent = "";
+
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement("div");
+    card.className = "skeleton-card";
+
+    const img = document.createElement("div");
+    img.className = "skeleton skeleton-image";
+
+    const caption = document.createElement("div");
+    caption.className = "skeleton-caption";
+
+    const meta = document.createElement("div");
+    meta.className = "skeleton skeleton-meta";
+
+    const title = document.createElement("div");
+    title.className = `skeleton ${i % 3 === 0 ? "skeleton-title-short" : "skeleton-title"}`;
+
+    const excerpt1 = document.createElement("div");
+    excerpt1.className = "skeleton skeleton-excerpt";
+
+    const excerpt2 = document.createElement("div");
+    excerpt2.className = "skeleton skeleton-excerpt-short";
+
+    caption.append(meta, title, excerpt1, excerpt2);
+    card.append(img, caption);
+    grid.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════
+// EMPTY STATE
+// ═══════════════════════════════════════════
+
 function renderEmpty(message) {
   const grid = document.getElementById("contentGrid");
   if (!grid) return;
 
   grid.textContent = "";
-  const empty = document.createElement("p");
-  empty.className = "content-empty";
-  empty.textContent = message;
+
+  const empty = document.createElement("div");
+  empty.className = "empty-state fade-in visible";
+
+  const icon = document.createElement("span");
+  icon.className = "empty-icon";
+  icon.textContent = "📭";
+  icon.setAttribute("aria-hidden", "true");
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Tidak ada konten";
+
+  const desc = document.createElement("p");
+  desc.textContent = message || "Belum ada konten Archive yang cocok dengan pencarian ini.";
+
+  empty.append(icon, heading, desc);
   grid.appendChild(empty);
 }
 
-// Menampilkan state loading saat konten WordPress sedang dimuat.
 function renderLoading() {
-  const grid = document.getElementById("contentGrid");
-  if (!grid) return;
-
-  grid.textContent = "";
-  const loading = document.createElement("p");
-  loading.className = "content-loading";
-  loading.textContent = "Memuat arsip dari makna.im...";
-  grid.appendChild(loading);
+  setText("contentStatus", "Memuat konten...");
+  renderSkeletons();
 }
 
-// Menerapkan search untuk satu Archive gabungan.
+// ═══════════════════════════════════════════
+// FILTERS & SEARCH
+// ═══════════════════════════════════════════
+
 function applyContentFilters() {
   const grid = document.getElementById("contentGrid");
   if (!grid) return;
@@ -318,10 +324,12 @@ function applyContentFilters() {
   }
 
   grid.textContent = "";
-  items.forEach((item) => grid.appendChild(createContentCard(item)));
+  items.forEach((item, index) => grid.appendChild(createContentCard(item, index)));
+
+  // Trigger fade-in for new cards
+  scheduleReveal();
 }
 
-// Mengaktifkan search bar untuk Archive.
 function initFilters() {
   const search = document.getElementById("contentSearch");
 
@@ -333,9 +341,100 @@ function initFilters() {
   }
 }
 
-// Titik utama hubungan app.js dengan WordPress:
-// fungsi ini memanggil window.WordPressData.loadArchive()
-// yang didefinisikan di assets/js/wordpress.js.
+// ═══════════════════════════════════════════
+// INTERSECTION OBSERVER — fade-in on scroll
+// ═══════════════════════════════════════════
+
+function initScrollReveal() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.05,
+      rootMargin: "0px 0px -20px 0px"
+    }
+  );
+
+  // Observe elements that already exist
+  document.querySelectorAll(".fade-in").forEach((el) => observer.observe(el));
+
+  // Store observer for later use
+  window.__fadeObserver = observer;
+
+  // Use MutationObserver to auto-observe new .fade-in elements added to DOM
+  const grid = document.getElementById("contentGrid");
+  if (grid) {
+    const mutationObserver = new MutationObserver(() => {
+      document.querySelectorAll(".fade-in:not(.visible)").forEach((el) => {
+        observer.observe(el);
+      });
+    });
+    mutationObserver.observe(grid, { childList: true, subtree: true });
+  }
+}
+
+function revealVisibleCards() {
+  const observer = window.__fadeObserver;
+  if (!observer) return;
+
+  document.querySelectorAll(".fade-in:not(.visible)").forEach((el) => {
+    observer.observe(el);
+  });
+}
+
+// Re-observe cards after they are rendered (async WordPress fetch)
+function scheduleReveal() {
+  // Small delay to let the browser paint first
+  setTimeout(() => {
+    revealVisibleCards();
+    // Also immediately reveal cards already in viewport
+    document.querySelectorAll(".fade-in:not(.visible)").forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add("visible");
+      }
+    });
+  }, 60);
+}
+
+// ═══════════════════════════════════════════
+// BACK TO TOP
+// ═══════════════════════════════════════════
+
+function initBackToTop() {
+  const btn = document.getElementById("backToTop");
+  if (!btn) return;
+
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        if (window.scrollY > 400) {
+          btn.classList.add("visible");
+        } else {
+          btn.classList.remove("visible");
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+// ═══════════════════════════════════════════
+// WORDPRESS INTEGRATION
+// ═══════════════════════════════════════════
+
 async function initWordPressContent() {
   const wp = window.WordPressData;
 
@@ -350,7 +449,6 @@ async function initWordPressContent() {
   try {
     const archive = await wp.loadArchive();
 
-    // Semua post WordPress tampil sebagai satu Archive, lalu diurutkan dari terbaru.
     allContentItems = normalizeForGrid(archive)
       .sort((first, second) => (second.timestamp || 0) - (first.timestamp || 0));
 
@@ -363,11 +461,16 @@ async function initWordPressContent() {
   }
 }
 
-// Jalankan semua fitur setelah HTML selesai dimuat.
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+
 document.addEventListener("DOMContentLoaded", () => {
   initThemeToggle();
   initNavbar();
   initContentModal();
   initFilters();
+  initScrollReveal();
+  initBackToTop();
   initWordPressContent();
 });

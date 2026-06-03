@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=20260603-liquid-nobg">
+  <link rel="stylesheet" href="assets/css/style.css?v=20260603-simple-theme">
 </head>
 <body>
   <nav id="navbar" class="site-nav">
@@ -30,9 +30,9 @@
     <div class="nav-actions">
       <a class="btn btn-dark" href="https://rexorange7.wordpress.com/wp-admin/post-new.php" target="_blank" rel="noopener noreferrer">Tambah Konten</a>
     </div>
-    <label class="theme-switch" aria-label="Ganti dark dan light mode">
-      <input class="liquid-3" id="themeToggle" type="checkbox" role="switch" aria-label="Aktifkan dark mode" aria-checked="false">
-    </label>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Aktifkan dark mode" aria-pressed="false">
+      <span id="themeToggleText">Dark</span>
+    </button>
     <button class="hamburger" id="hamburger" type="button" aria-label="Buka menu">
       <span></span>
       <span></span>
@@ -94,26 +94,17 @@
         <p class="modal-date" id="modalDate"></p>
         <h2 id="modalTitle"></h2>
         <div class="modal-content" id="modalContent"></div>
-        <section class="engagement" aria-label="Komentar">
-          <div class="comments-panel">
-            <h3>Komentar</h3>
-            <div class="comments-list" id="commentsList">
-              <p>Memuat komentar...</p>
-            </div>
-            <form class="comment-form" id="commentForm">
-              <input id="commentName" name="name" type="text" placeholder="Nama" autocomplete="name" required>
-              <textarea id="commentText" name="comment" rows="4" placeholder="Tulis komentar..." required></textarea>
-              <button class="btn btn-dark" type="submit">Kirim Komentar</button>
-              <p id="commentStatus"></p>
-            </form>
-          </div>
-        </section>
       </div>
     </article>
   </div>
 
   <script src="assets/js/config.js?v=20260603-archive2"></script>
-  <script src="assets/js/wordpress.js?v=20260603-engagement"></script>
-  <script src="assets/js/app.js?v=20260603-liquid-switch"></script>
+  <script src="assets/js/wordpress.js?v=20260603-clean-modal"></script>
+  <script src="assets/js/app.js?v=20260603-simple-theme"></script>
 </body>
 </html>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" type="button" aria-label="Kembali ke atas">
+  ↑
+</button>
