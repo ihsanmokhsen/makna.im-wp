@@ -2,6 +2,7 @@
   // Mengambil konfigurasi WordPress dari assets/js/config.js.
   const config = window.SITE_CONFIG || {};
   const wpConfig = config.wordpress || {};
+  const likeMarker = "[makna-like]";
 
   // Cache sederhana agar ID kategori tidak diminta berulang-ulang ke API.
   const categoryCache = new Map();
@@ -50,6 +51,24 @@
 
     if (!response.ok) {
       throw new Error(`WordPress request failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // Mengirim data form ke WordPress API, dipakai untuk komentar.
+  async function postForm(resource, data) {
+    const response = await fetch(buildUrl(resource), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+      },
+      body: new URLSearchParams(data).toString()
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || `WordPress request failed: ${response.status}`);
     }
 
     return response.json();
@@ -126,6 +145,24 @@
     };
   }
 
+  // Komentar lama dengan marker like tetap disembunyikan jika pernah ada.
+  function isLikeComment(comment) {
+    return stripHtml(comment?.content?.rendered || "").includes(likeMarker);
+  }
+
+  // Menyeragamkan format komentar WordPress untuk modal.
+  function normalizeComment(comment) {
+    return {
+      id: comment.id,
+      post: comment.post,
+      author: stripHtml(comment.author_name) || "Pengunjung",
+      date: formatDate(comment.date),
+      content: comment.content?.rendered || "",
+      text: stripHtml(comment.content?.rendered),
+      isLike: isLikeComment(comment)
+    };
+  }
+
   // Mengambil semua post WordPress sebagai satu Archive.
   // Jika archiveCategorySlug dikosongkan, semua post publik akan tampil.
   // Jika archiveCategorySlug diisi "archive", hanya post kategori Archive yang tampil.
@@ -148,6 +185,33 @@
     return posts.map(normalizePost);
   }
 
+  // Mengambil komentar sebuah post.
+  async function loadComments(postId) {
+    if (!isEnabled() || !postId) return [];
+
+    const comments = await fetchJson("comments", {
+      post: postId,
+      per_page: 100,
+      orderby: "date",
+      order: "asc"
+    });
+
+    return comments.map(normalizeComment);
+  }
+
+  // Menyimpan komentar pengunjung ke database WordPress.
+  async function submitComment(postId, data) {
+    if (!isEnabled() || !postId) {
+      throw new Error("Post WordPress tidak ditemukan.");
+    }
+
+    return postForm("comments", {
+      post: postId,
+      author_name: data.name,
+      content: data.content
+    });
+  }
+
   // Link Archive WordPress. Saat ini tidak dipakai untuk redirect post, tapi tetap disiapkan.
   function getArchiveUrl() {
     const baseUrl = getBaseUrl();
@@ -161,6 +225,8 @@
   window.WordPressData = {
     enabled: isEnabled,
     loadArchive,
+    loadComments,
+    submitComment,
     getArchiveUrl
   };
 })();

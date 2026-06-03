@@ -111,6 +111,8 @@ function openContentModal(item) {
   modal.classList.add("open");
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
+  initEngagementHandlers(item);
+  loadEngagement(item);
 }
 
 // Menutup popup detail konten.
@@ -121,6 +123,106 @@ function closeContentModal() {
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-open");
+}
+
+function renderComments(comments) {
+  const commentsList = document.getElementById("commentsList");
+  if (!commentsList) return;
+
+  const visibleComments = comments.filter((comment) => !comment.isLike);
+  commentsList.textContent = "";
+
+  if (!visibleComments.length) {
+    const empty = document.createElement("p");
+    empty.className = "content-empty";
+    empty.textContent = "Belum ada komentar.";
+    commentsList.appendChild(empty);
+    return;
+  }
+
+  visibleComments.forEach((comment) => {
+    const item = document.createElement("article");
+    item.className = "comment-item";
+
+    const header = document.createElement("header");
+    const author = document.createElement("strong");
+    author.textContent = comment.author;
+    const date = document.createElement("span");
+    date.textContent = comment.date || "Archive";
+    header.append(author, date);
+
+    const body = document.createElement("div");
+    body.innerHTML = comment.content || `<p>${comment.text}</p>`;
+
+    item.append(header, body);
+    commentsList.appendChild(item);
+  });
+}
+
+async function loadEngagement(item) {
+  const wp = window.WordPressData;
+  const commentsList = document.getElementById("commentsList");
+  const commentStatus = document.getElementById("commentStatus");
+
+  setText("commentStatus", "");
+
+  if (commentsList) {
+    commentsList.textContent = "";
+    const loading = document.createElement("p");
+    loading.textContent = "Memuat komentar...";
+    commentsList.appendChild(loading);
+  }
+
+  if (!wp?.loadComments || !item.id) {
+    if (commentsList) commentsList.textContent = "Komentar belum tersedia untuk post ini.";
+    return;
+  }
+
+  try {
+    const comments = await wp.loadComments(item.id);
+    renderComments(comments);
+  } catch (error) {
+    console.warn("Gagal memuat komentar WordPress.", error);
+    if (commentsList) commentsList.textContent = "Komentar belum bisa dimuat.";
+    if (commentStatus) commentStatus.textContent = "Komentar WordPress belum bisa dimuat.";
+  }
+}
+
+function initEngagementHandlers(item) {
+  const wp = window.WordPressData;
+  const commentForm = document.getElementById("commentForm");
+
+  if (commentForm) {
+    commentForm.onsubmit = async (event) => {
+      event.preventDefault();
+
+      if (!wp?.submitComment || !item.id) return;
+
+      const submitButton = commentForm.querySelector("button[type='submit']");
+      const name = document.getElementById("commentName")?.value.trim();
+      const content = document.getElementById("commentText")?.value.trim();
+
+      if (!name || !content) {
+        setText("commentStatus", "Lengkapi nama dan komentar.");
+        return;
+      }
+
+      if (submitButton) submitButton.disabled = true;
+      setText("commentStatus", "Menyimpan komentar...");
+
+      try {
+        await wp.submitComment(item.id, { name, content });
+        document.getElementById("commentText").value = "";
+        setText("commentStatus", "Komentar tersimpan di WordPress.");
+        await loadEngagement(item);
+      } catch (error) {
+        console.warn("Gagal menyimpan komentar WordPress.", error);
+        setText("commentStatus", "Komentar belum bisa disimpan.");
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
+    };
+  }
 }
 
 // Menghubungkan tombol close/backdrop/Escape dengan fungsi tutup modal.
