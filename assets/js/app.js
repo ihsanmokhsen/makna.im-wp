@@ -93,7 +93,7 @@ function initThemeToggle() {
   const toggle = document.getElementById("themeToggle");
   const storedTheme = (() => {
     try {
-      return localStorage.getItem("makna-theme");
+      return localStorage.getItem("kenang-theme");
     } catch {
       return null;
     }
@@ -108,7 +108,7 @@ function initThemeToggle() {
     const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     applyTheme(nextTheme);
     try {
-      localStorage.setItem("makna-theme", nextTheme);
+      localStorage.setItem("kenang-theme", nextTheme);
     } catch {
       // localStorage blocked
     }
@@ -264,7 +264,7 @@ function openContentModal(item) {
   });
   modalImage.appendChild(image);
 
-  modalDate.textContent = `${item.category} · ${item.date || "makna.im"}`;
+  modalDate.textContent = `${item.category} · ${item.date || "kenang-kenangan hidup"}`;
   modalTitle.textContent = item.title || "Untitled";
 
   // Sanitize HTML content to prevent XSS
@@ -340,7 +340,7 @@ function createContentCard(item, index) {
   const category = document.createElement("span");
   category.textContent = item.category;
   const date = document.createElement("span");
-  date.textContent = item.date || "makna.im";
+  date.textContent = item.date || "kenang-kenangan hidup";
   meta.append(category, date);
 
   const title = document.createElement("h3");

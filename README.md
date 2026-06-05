@@ -1,6 +1,6 @@
-# makna.im
+# kenang-kenangan hidup
 
-`makna.im` adalah website **Digital Memory Magazine**: ruang digital untuk merawat cerita, visual, dokumentasi, dan momen hidup yang punya makna.
+`kenang-kenangan hidup` adalah website **Digital Memory Magazine**: ruang digital untuk merawat cerita, visual, dokumentasi, dan momen hidup yang punya makna.
 
 Website ini memakai WordPress sebagai CMS, sementara tampilan depannya dibuat sebagai frontend statis modern. Konten tidak dibuka dengan redirect ke WordPress, tetapi ditampilkan langsung di website melalui popup/modal.
 
@@ -8,7 +8,7 @@ Website ini memakai WordPress sebagai CMS, sementara tampilan depannya dibuat se
 
 Konsep utama aplikasi:
 
-- Brand: `makna.im`
+- Brand: `kenang-kenangan hidup`
 - Tema: `kenang-kenangan hidup`
 - Gaya visual: minimalis, premium, modern, editorial, cinematic
 - Inspirasi desain: Apple, Behance, Swiss editorial layout, high-end SaaS
