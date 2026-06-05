@@ -1,6 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kenang Kenangan Hidup">
-  <rect width="64" height="64" rx="18" fill="#f5f5f7"/>
-  <rect x="1" y="1" width="62" height="62" rx="17" fill="none" stroke="#d8d8de" stroke-width="2"/>
-  <path d="M18 18h7v11l10-11h9L32 31l13 15h-9L25 33v13h-7V18Z" fill="#050505"/>
-  <circle cx="47" cy="17" r="5" fill="#2563ff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c9ebf"/>
+      <stop offset="100%" stop-color="#a8c6e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="20" fill="url(#g)"/>
+  <text x="50" y="68" font-family="system-ui, sans-serif" font-size="52" font-weight="700" fill="white" text-anchor="middle" letter-spacing="-2">mk</text>
 </svg>

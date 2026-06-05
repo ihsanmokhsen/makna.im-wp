@@ -17,7 +17,7 @@ Konsep utama aplikasi:
 ## Fitur
 
 - Landing page premium dengan hero besar.
-- Search bar untuk mencari konten yang sudah dimuat.
+- Search bar untuk mencari konten yang sudah dimuat (desktop di navbar, mobile di section Archive).
 - Satu tab utama: `Archive`.
 - Semua post WordPress digabung dalam satu grid editorial.
 - Setiap kartu memakai label tunggal `Archive`.
@@ -26,15 +26,26 @@ Konsep utama aplikasi:
 - Tidak redirect ke WordPress saat kartu diklik.
 - Responsive untuk desktop dan mobile.
 - Data konten diambil dari WordPress public API.
+- Theme toggle (dark/light mode) dengan persistensi localStorage.
+- Navbar dengan hide-on-scroll dan mobile hamburger menu.
 
 ## Struktur File
 
 ```text
-landingpageihsan/
+kenang kenangan hidup _ wp/
 ├── index.html
-├── ihsan-mokhsen.html
 ├── README.md
+├── CNAME
 └── assets/
+    ├── logo.png
+    ├── favicon.svg
+    ├── favicon-16.png
+    ├── favicon-32.png
+    ├── favicon-48.png
+    ├── favicon-192.png
+    ├── favicon-512.png
+    ├── favicon-180.png
+    ├── site.webmanifest
     ├── css/
     │   └── style.css
     └── js/
@@ -46,7 +57,6 @@ landingpageihsan/
 Penjelasan:
 
 - `index.html`: struktur halaman utama, navbar, hero, Archive, grid, dan modal.
-- `ihsan-mokhsen.html`: redirect lama ke `index.html`.
 - `assets/css/style.css`: seluruh desain visual, layout, responsive, grid, dan modal.
 - `assets/js/config.js`: konfigurasi koneksi WordPress.
 - `assets/js/wordpress.js`: pengambilan data dari WordPress API.
@@ -75,7 +85,7 @@ window.SITE_CONFIG = {
     archiveCategorySlug: "archive",
     archivePerPage: 12
   },
-  fallbackImage: "https://picsum.photos/seed/ntt-default/800/450"
+  fallbackImage: "data:image/svg+xml,..."
 };
 ```
 
@@ -84,7 +94,7 @@ Arti setiap konfigurasi:
 - `baseUrl`: domain WordPress yang menjadi sumber konten.
 - `archiveCategorySlug`: slug kategori WordPress untuk Archive.
 - `archivePerPage`: jumlah maksimal post Archive yang diambil.
-- `fallbackImage`: gambar cadangan jika post tidak punya featured image.
+- `fallbackImage`: gambar cadangan jika post tidak punya featured image (SVG inline).
 
 ## Endpoint API
 
