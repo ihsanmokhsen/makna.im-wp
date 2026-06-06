@@ -660,7 +660,8 @@ button {
   width: 100%;
   height: auto;
   background: var(--image-frame);
-  object-fit: contain;
+  object-fit: cover;
+  aspect-ratio: 16 / 10;
   opacity: 0;
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
 }
@@ -976,7 +977,10 @@ button {
 
 .modal-body {
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  padding-bottom: clamp(2rem, 4vw, 3rem);
 }
 
 .modal-date {
@@ -1198,11 +1202,20 @@ button {
 
   .modal-dialog {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    max-height: 92vh;
   }
 
   .modal-image {
     min-height: 220px;
     max-height: 300px;
+    grid-row: 1;
+  }
+
+  .modal-body {
+    grid-row: 2;
+    overflow-y: auto;
+    max-height: calc(92vh - 300px);
   }
 
   .back-to-top {
@@ -1255,12 +1268,20 @@ button {
   }
 
   .modal-dialog {
-    max-height: 90vh;
+    max-height: 94vh;
     border-radius: var(--radius-md);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .modal-image {
+    max-height: 240px;
   }
 
   .modal-body {
     padding: 1.2rem;
+    padding-bottom: 2rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .back-to-top {
